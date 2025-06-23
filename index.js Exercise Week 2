@@ -1,0 +1,41 @@
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+app.get('/', (req, res) => {
+    res.send('Ride API is running');
+});
+
+app.listen(3000, () => {
+    console.log('Server running on http://localhost:3000');
+});
+
+let rides = []; // temporary array to hold rides
+
+app.get('/rides', (req, res) => {
+    res.json(rides);
+});
+
+app.post('/rides', (req, res) => {
+    const ride = { id: Date.now(), ...req.body };
+    rides.push(ride);
+    res.status(201).json(ride);
+});
+
+app.put('/rides/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const ride = rides.find(r => r.id === id);
+    if (!ride) return res.status(404).json({ error: "Ride not found" });
+    Object.assign(ride, req.body);
+    res.json({ updated: true, ride });
+});
+
+app.delete('/rides/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = rides.findIndex(r => r.id === id);
+    if (index === -1) return res.status(404).json({ error: "Ride not found" });
+    rides.splice(index, 1);
+    res.json({ deleted: true });
+});
+
